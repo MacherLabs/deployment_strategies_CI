@@ -27,7 +27,7 @@ function deploy_docker_strategy(){
     # Add the SSH key stored in SSH_PRIVATE_KEY variable to the agent store
     echo "$SSH_STAGING_PRIVATE_KEY_DEPLOYER" | ssh-add -
     
-    remoteCommads='
+    export remoteCommands='
     echo "changing directory to docker compose folder","$STAGING_DOCKER_COMPOSE_FOLDER";
     cd $STAGING_DOCKER_COMPOSE_FOLDER;
     echo "pull docker file to latest version";
