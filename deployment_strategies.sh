@@ -27,8 +27,11 @@ function deploy_docker_strategy(){
     # Add the SSH key stored in SSH_PRIVATE_KEY variable to the agent store
     echo "$SSH_STAGING_PRIVATE_KEY_DEPLOYER" | ssh-add -
     ssh "$SSH_USERNAME_STAGING_SERVER"@"$SSH_HOSTNAME_STAGING_SERVER" -o StrictHostKeyChecking=no <<"EOF"
+    echo "changing directory to docker compose folder",$STAGING_DOCKER_COMPOSE_FOLDER
     cd $STAGING_DOCKER_COMPOSE_FOLDER
+    echo "pull docker file to latest version"
     docker-compose pull $CI_PROJECT_NAME
+    echo "restarting $CI_PROJECT_NAME docker service"
     docker-compose up -d --no-deps $CI_PROJECT_NAME
 EOF
 
