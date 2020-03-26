@@ -22,8 +22,7 @@ function deploy_docker_strategy(){
     # (change apt-get to yum if you use a CentOS-based image)
     'which ssh-agent || ( apk add --update openssh )'
     # Run ssh-agent (inside the build environment)
-    eval $(ssh-agent -s)
-
+    eval "$(ssh-agent -s)"
     # Add the SSH key stored in SSH_PRIVATE_KEY variable to the agent store
     echo "$SSH_PRIVATE_KEY_PM2_DEPLOY_WEBSITE" | ssh-add -
 
@@ -38,7 +37,7 @@ function deploy_docker_strategy(){
     # instead.
     # - mkdir -p ~/.ssh
     # - '[[ -f /.dockerenv ]] && echo "$SSH_SERVER_HOSTKEYS" > ~/.ssh/known_hosts'
-    ssh $SSH_USERNAME_STAGING_SERVER@$SSH_HOSTNAME_STAGING_SERVER <<-EOF
+    ssh "$SSH_USERNAME_STAGING_SERVER"@"$SSH_HOSTNAME_STAGING_SERVER" <<"EOF"
     cd $STAGING_DOCKER_COMPOSE_FOLDER
     docker-compose pull $CI_PROJECT_NAME
     docker-compose up -d --no-deps $CI_PROJECT_NAME
@@ -54,16 +53,17 @@ function deploy_kubernetes_strategy(){
         cp "$KUBE_CONFIG_STAGING" /root/.kube/config
     else
         cp "$KUBE_CONFIG_PRODUCTION" /root/.kube/config
+    fi
     kubectl get pods --all-namespaces
     ls && pwd
     helm init --service-account tiller --history-max 100
-    helm delete --debug --purge $CI_PROJECT_NAME
+    helm delete --debug --purge "$CI_PROJECT_NAME"
 
     if [ "$CI_COMMIT_REF_NAME" == "staging" ]
     then
-        helm upgrade --install $CI_PROJECT_NAME ./charts/$CI_PROJECT_NAME --namespace $CI_COMMIT_REF_NAME --debug --set image.repotag=$CI_COMMIT_REF_NAME
+        helm upgrade --install "$CI_PROJECT_NAME" ./charts/"$CI_PROJECT_NAME" --namespace "$CI_COMMIT_REF_NAME" --debug --set image.repotag="$CI_COMMIT_REF_NAME"
     else
-        helm upgrade --install $CI_PROJECT_NAME ./charts/$CI_PROJECT_NAME --namespace prod --debug --set image.repotag=$CI_BUILD_TAG
+        helm upgrade --install "$CI_PROJECT_NAME" ./charts/"$CI_PROJECT_NAME" --namespace prod --debug --set image.repotag="$CI_BUILD_TAG"
     fi
     # [ ! -z "$CI_BUILD_TAG" ]
 }
