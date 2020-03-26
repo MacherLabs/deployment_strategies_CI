@@ -18,6 +18,7 @@ fi
 
 function deploy_docker_strategy(){
     echo "gonna deploy via docker strategy"
+    apk add --update --no-cache bash git openssh
     # Install ssh-agent if not already installed, it is required by Docker.
     # (change apt-get to yum if you use a CentOS-based image)
     'which ssh-agent || ( apk add --update openssh )'
