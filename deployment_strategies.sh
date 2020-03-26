@@ -25,20 +25,20 @@ function deploy_docker_strategy(){
     # Run ssh-agent (inside the build environment)
     eval "$(ssh-agent -s)"
     # Add the SSH key stored in SSH_PRIVATE_KEY variable to the agent store
-    echo "$SSH_PRIVATE_KEY_PM2_DEPLOY_WEBSITE" | ssh-add -
+    echo "$SSH_STAGING_PRIVATE_KEY_DEPLOYER" | ssh-add -
 
     # For Docker builds disable host key checking. Be aware that by adding that
     # you are suspectible to man-in-the-middle attacks.
     # WARNING: Use this only with the Docker executor, if you use it with shell
     # you will overwrite your user's SSH config.
-    mkdir -p ~/.ssh
-    '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    # mkdir -p ~/.ssh
+    # '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     # In order to properly check the server's host key, assuming you created the
     # SSH_SERVER_HOSTKEYS variable previously, uncomment the following two lines
     # instead.
     # - mkdir -p ~/.ssh
     # - '[[ -f /.dockerenv ]] && echo "$SSH_SERVER_HOSTKEYS" > ~/.ssh/known_hosts'
-    ssh "$SSH_USERNAME_STAGING_SERVER"@"$SSH_HOSTNAME_STAGING_SERVER" <<"EOF"
+    ssh "$SSH_USERNAME_STAGING_SERVER"@"$SSH_HOSTNAME_STAGING_SERVER" -o StrictHostKeyChecking=no <<"EOF"
     cd $STAGING_DOCKER_COMPOSE_FOLDER
     docker-compose pull $CI_PROJECT_NAME
     docker-compose up -d --no-deps $CI_PROJECT_NAME
